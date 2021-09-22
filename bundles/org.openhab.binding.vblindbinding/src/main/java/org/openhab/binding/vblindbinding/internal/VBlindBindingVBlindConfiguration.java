@@ -13,16 +13,14 @@
 package org.openhab.binding.vblindbinding.internal;
 
 /**
- * The {@link VBlindBindingConfiguration} class contains fields mapping thing configuration parameters.
+ * The {@link VBlindBindingVBlindConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Thomas Wang-Nielsen - Initial contribution
  */
-public class VBlindBindingConfiguration {
-
-    /**
-     * Sample configuration parameters. Replace with your own.
-     */
-    public String hostname;
-    public String password;
-    public int refreshInterval;
+public class VBlindBindingVBlindConfiguration {
+    public int major;
+    public int minor;
+    public String pos1;
+    public String pos2;
+    public String pos3;
 }

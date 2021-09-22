@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="vblindbinding"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<thing-type id="vblind">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+
+		<label>VBlind</label>
+		<description>VBlind</description>
+
+		<channels>
+			<channel id="pos" typeId="pos-channel"/>
+			<channel id="dim" typeId="dim-channel"/>
+			<channel id="control" typeId="control-channel"/>
+		</channels>
+
+		<config-description>
+			<parameter name="major" type="integer" required="true" min="1" max="200">
+				<label>Major</label>
+				<description>Major 1-200</description>
+			</parameter>
+			<parameter name="minor" type="integer" required="true" min="1" max="200">
+				<label>Minor</label>
+				<description>Minor 1-200</description>
+			</parameter>
+			<parameter name="pos1" type="text" required="false">
+				<label>Pos1</label>
+				<description>Predefined position 1 eg. "50, 100" [pos 0-100(pct), dim 0-180(deg)]</description>
+			</parameter>
+			<parameter name="pos2" type="text" required="false">
+				<label>Pos2</label>
+				<description>Predefined position 2 eg. "50, 100" [pos 0-100(pct), dim 0-180(deg)]</description>
+			</parameter>
+			<parameter name="pos3" type="text" required="false">
+				<label>Pos3</label>
+				<description>Predefined position 3 eg. "50, 100" [pos 0-100(pct), dim 0-180(deg)]</description>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+
+	<!-- Sample Channel Type -->
+	<channel-type id="pos-channel">
+		<item-type>Number</item-type>
+		<label>Position</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
+		<description>Position in pct</description>
+	</channel-type>
+	<channel-type id="dim-channel">
+		<item-type>Number</item-type>
+		<label>Dim Position</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
+		<description>Dim Position in deg (0-180)</description>
+	</channel-type>
+	<channel-type id="control-channel">
+		<item-type>String</item-type>
+		<label>Control</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
+		<description>Control stop, opened, closed, closed_black, pos1, pos2, pos3</description>
+	</channel-type>
+</thing:thing-descriptions>
