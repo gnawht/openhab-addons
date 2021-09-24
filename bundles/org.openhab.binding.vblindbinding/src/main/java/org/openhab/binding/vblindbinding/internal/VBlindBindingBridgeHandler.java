@@ -68,7 +68,6 @@ public class VBlindBindingBridgeHandler extends BaseBridgeHandler implements VBl
     public void initialize() {
         config = getConfigAs(VBlindBindingBridgeConfiguration.class);
         logger.debug("initialize host:{} port:{}", config.host, config.port);
-
         this.updateStatus(ThingStatus.UNKNOWN);
         this.brideController = new BridgeController(config, this);
         scheduler.execute(() -> {
@@ -90,6 +89,10 @@ public class VBlindBindingBridgeHandler extends BaseBridgeHandler implements VBl
     @Override
     public void notifyOffline() {
         updateStatus(ThingStatus.OFFLINE);
+    }
+
+    @Override
+    public void notifyOnChange() {
     }
 
     @Override

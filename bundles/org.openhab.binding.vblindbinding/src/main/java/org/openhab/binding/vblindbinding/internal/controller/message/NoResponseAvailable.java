@@ -10,19 +10,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vblindbinding.internal.controller;
+package org.openhab.binding.vblindbinding.internal.controller.message;
 
 /**
- * The {@link MessageWithResponseCallback} is responsible for notifications
+ * The {@link NoResponseAvailable} is responsible for notifications
  *
  * @author Thomas Wang-Nielsen - Initial contribution
  */
-public interface MessageWithResponseCallback {
-    public void done();
+public class NoResponseAvailable extends Exception {
+    private String message;
 
-    public void done(MessageRawResponse response);
+    public NoResponseAvailable(String message) {
+        this.message = message;
+    }
 
-    public void timeout();
-
-    public void waiting();
+    @Override
+    public String getMessage() {
+        return message;
+    }
 }

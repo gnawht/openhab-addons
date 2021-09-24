@@ -10,18 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vblindbinding.internal.controller;
-
-import org.openhab.binding.vblindbinding.internal.controller.message.Message;
+package org.openhab.binding.vblindbinding.internal.controller.command;
 
 /**
- * The {@link Message} is responsible for notifications
+ * The {@link CommandCallback} is responsible for notifications
  *
  * @author Thomas Wang-Nielsen - Initial contribution
  */
-public interface BridgeControllerVBlindCallback {
+public abstract interface CommandCallback {
+    public void callbackTimeout();
 
-    public void vblindSendMessage(Message message);
+    public void callbackError(String message);
 
-    public boolean vblindIsOnline();
+    public void callbackDone();
+
+    public void callbackCanceled();
 }

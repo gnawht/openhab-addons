@@ -13,9 +13,10 @@
 		<description>VBlind</description>
 
 		<channels>
-			<channel id="pos" typeId="pos-channel"/>
-			<channel id="dim" typeId="dim-channel"/>
-			<channel id="control" typeId="control-channel"/>
+			<channel id="pos_channel" typeId="pos_channel_type"/>
+			<channel id="dim_channel" typeId="dim_channel_type"/>
+			<channel id="pos_state_channel" typeId="pos_state_channel_type"/>
+			<channel id="control_channel" typeId="control_channel_type"/>
 		</channels>
 
 		<config-description>
@@ -29,34 +30,54 @@
 			</parameter>
 			<parameter name="pos1" type="text" required="false">
 				<label>Pos1</label>
-				<description>Predefined position 1 eg. "50, 100" [pos 0-100(pct), dim 0-180(deg)]</description>
+				<description>Predefined position 1 eg. "50:100" [pos 0-100(pct):dim 0-180(deg)]</description>
 			</parameter>
 			<parameter name="pos2" type="text" required="false">
 				<label>Pos2</label>
-				<description>Predefined position 2 eg. "50, 100" [pos 0-100(pct), dim 0-180(deg)]</description>
+				<description>Predefined position 2 eg. "50:100" [pos 0-100(pct):dim 0-180(deg)]</description>
 			</parameter>
 			<parameter name="pos3" type="text" required="false">
 				<label>Pos3</label>
-				<description>Predefined position 3 eg. "50, 100" [pos 0-100(pct), dim 0-180(deg)]</description>
+				<description>Predefined position 3 eg. "50:100" [pos 0-100(pct):dim 0-180(deg)]</description>
 			</parameter>
 		</config-description>
 	</thing-type>
 
 
 	<!-- Sample Channel Type -->
-	<channel-type id="pos-channel">
+	<channel-type id="pos_channel_type">
 		<item-type>Number</item-type>
-		<label>Position</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
+		<label>Pos</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
 		<description>Position in pct</description>
+		<state min="0" max="100" step="1" readOnly="false"/>
 	</channel-type>
-	<channel-type id="dim-channel">
+	<channel-type id="dim_channel_type">
 		<item-type>Number</item-type>
-		<label>Dim Position</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
-		<description>Dim Position in deg (0-180)</description>
+		<label>Dim</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
+		<description>Dim in deg (0-180)</description>
+		<state min="0" max="180" step="1" readOnly="false"/>
 	</channel-type>
-	<channel-type id="control-channel">
+	<channel-type id="pos_state_channel_type">
 		<item-type>String</item-type>
-		<label>Control</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
-		<description>Control stop, opened, closed, closed_black, pos1, pos2, pos3</description>
+		<label>Pos State</label>
+		<description>Pos State [open, close, close_black, pos1, pos2, pos3, change, unknown]</description>
+		<state readOnly="true"/>
 	</channel-type>
+	<channel-type id="control_channel_type">
+		<item-type>String</item-type>
+		<label>Control</label>
+		<description>Control commands</description>
+		<command>
+			<options>
+				<option value="stop">Stop</option>
+				<option value="goto_open">Open</option>
+				<option value="goto_close">Close</option>
+				<option value="goto_close_black">Close Black</option>
+				<option value="goto_pos1">Pos1</option>
+				<option value="goto_pos2">Pos2</option>
+				<option value="goto_pos3">Pos3</option>
+			</options>
+		</command>
+	</channel-type>
+
 </thing:thing-descriptions>

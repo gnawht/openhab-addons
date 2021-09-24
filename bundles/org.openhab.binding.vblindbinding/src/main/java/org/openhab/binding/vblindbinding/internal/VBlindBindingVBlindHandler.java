@@ -17,6 +17,8 @@ import static org.openhab.binding.vblindbinding.internal.VBlindBindingBindingCon
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.vblindbinding.internal.controller.VBlindController;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -47,38 +49,30 @@ public class VBlindBindingVBlindHandler extends BaseThingHandler implements VBli
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         if (CHANNEL_VBLIND_POS.equals(channelUID.getId())) {
+            String posStr = command.toString();
+            logger.debug("handleCommand.pos major:{} minor:{} pos:{}", config.major, config.minor, posStr);
             if (command instanceof RefreshType) {
-                // TODO: handle data refresh
+                logger.debug("handleCommand.pos.refresh major:{} minor:{}", config.major, config.minor);
+                return;
             }
-
-            // TODO: handle command
-
-            // Note: if communication with thing fails for some reason,
-            // indicate that by setting the status with detail information:
-            // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-            // "Could not control device at IP address x.x.x.x");
+            controller.setPos(Integer.parseInt(posStr));
         } else if (CHANNEL_VBLIND_DIM.equals(channelUID.getId())) {
+            String posStr = command.toString();
+            logger.debug("handleCommand.dim major:{} minor:{} pos:{}", config.major, config.minor, posStr);
             if (command instanceof RefreshType) {
-                // TODO: handle data refresh
+                logger.debug("handleCommand.dim.refresh major:{} minor:{}", config.major, config.minor);
+                return;
             }
-
-            // TODO: handle command
-
-            // Note: if communication with thing fails for some reason,
-            // indicate that by setting the status with detail information:
-            // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-            // "Could not control device at IP address x.x.x.x");
+            controller.setDim(Integer.parseInt(posStr));
         } else if (CHANNEL_VBLIND_CONTROL.equals(channelUID.getId())) {
+            String state = command.toString();
+            logger.debug("handleCommand.control major:{} minor:{} command:{}", config.major, config.minor, state);
             if (command instanceof RefreshType) {
-                // TODO: handle data refresh
+                logger.debug("handleCommand.control.refresh major:{} minor:{} command:{}", config.major, config.minor,
+                        state);
+                return;
             }
-
-            // TODO: handle command
-
-            // Note: if communication with thing fails for some reason,
-            // indicate that by setting the status with detail information:
-            // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-            // "Could not control device at IP address x.x.x.x");
+            controller.enterState(state);
         }
     }
 
@@ -94,8 +88,8 @@ public class VBlindBindingVBlindHandler extends BaseThingHandler implements VBli
 
     @Override
     public void dispose() {
-        logger.debug("dispose");
-        this.controller.stop();
+        logger.debug("dispose major:{} minor:{}", config.major, config.minor);
+        controller.stop();
     }
 
     @Override
@@ -106,5 +100,14 @@ public class VBlindBindingVBlindHandler extends BaseThingHandler implements VBli
     @Override
     public void notifyOffline() {
         updateStatus(ThingStatus.OFFLINE);
+    }
+
+    @Override
+    public void notifyOnChange() {
+        scheduler.execute(() -> {
+            updateState(CHANNEL_VBLIND_POS, new DecimalType(controller.getCurrentPos()));
+            updateState(CHANNEL_VBLIND_DIM, new DecimalType(controller.getCurrentDim()));
+            updateState(CHANNEL_VBLIND_POSSTATE, new StringType(controller.getPosState()));
+        });
     }
 }

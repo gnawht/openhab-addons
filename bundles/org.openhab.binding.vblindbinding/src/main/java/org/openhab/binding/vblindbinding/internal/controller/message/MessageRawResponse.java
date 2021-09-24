@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vblindbinding.internal.controller;
+package org.openhab.binding.vblindbinding.internal.controller.message;
 
 import static org.openhab.core.util.HexUtils.bytesToHex;
 
@@ -34,14 +34,16 @@ public class MessageRawResponse extends MessageRaw {
     private final byte command;
     private final byte[] data;
     private final byte[] crc;
+    private final byte[] raw;
 
-    MessageRawResponse(byte id, byte major, byte minor, byte command, byte[] data, byte[] crc) {
+    MessageRawResponse(byte id, byte major, byte minor, byte command, byte[] data, byte[] crc, byte[] raw) {
         this.id = id;
         this.major = major;
         this.minor = minor;
         this.command = command;
         this.data = data;
         this.crc = crc;
+        this.raw = raw;
     }
 
     public byte getId() {
@@ -50,6 +52,10 @@ public class MessageRawResponse extends MessageRaw {
 
     public byte[] getData() {
         return data;
+    }
+
+    public byte[] getRaw() {
+        return raw;
     }
 
     static public MessageRawResponse parseFromBuffer(byte[] buffer) throws NoResponseAvailable {
@@ -85,7 +91,8 @@ public class MessageRawResponse extends MessageRaw {
                 data = Arrays.copyOfRange(buffer, 4, 4 + size - 6);
             }
             System.out.println("parseFromBuffer data    :" + bytesToHex(data, " "));
-            return new MessageRawResponse(id, major, minor, command, data, crc);
+            return new MessageRawResponse(id, major, minor, command, data, crc,
+                    ByteBuffer.wrap(buffer, 0, size).array());
         }
         throw new NoResponseAvailable("invalid length");
     }

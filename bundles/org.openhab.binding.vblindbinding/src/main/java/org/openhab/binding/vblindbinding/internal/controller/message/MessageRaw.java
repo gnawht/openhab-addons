@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vblindbinding.internal.controller;
+package org.openhab.binding.vblindbinding.internal.controller.message;
 
 import java.nio.ByteBuffer;
 

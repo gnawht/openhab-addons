@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.vblindbinding.internal.VBlindBindingBridgeConfiguration;
 import org.openhab.binding.vblindbinding.internal.VBlindBindingNotifyThingStatus;
+import org.openhab.binding.vblindbinding.internal.controller.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +69,7 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
         if (this.socket != null) {
             try {
                 this.socket.close();
+                this.socket = null;
             } catch (IOException e) {
                 logger.error("Exception.3:{}", e.getMessage());
             }
@@ -75,6 +77,7 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
         if (this.serverSocket != null) {
             try {
                 this.serverSocket.close();
+                this.serverSocket = null;
             } catch (IOException e) {
                 logger.error("Exception.3:{}", e.getMessage());
             }
@@ -83,11 +86,12 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
 
     private void startServer() {
         try {
-            this.serverSocket = new ServerSocket(this.config.port, 1, InetAddress.getByName(this.config.host));
+            serverSocket = new ServerSocket(this.config.port, 1, InetAddress.getByName(this.config.host));
+            serverSocket.setReuseAddress(true);
             logger.debug("Listening on {}:{}", config.host, config.port);
 
-            this.socket = serverSocket.accept();
-            this.notifyThingStatus.notifyOnline();
+            socket = serverSocket.accept();
+            notifyThingStatus.notifyOnline();
             logger.debug("Client connected from:{}", this.socket.getRemoteSocketAddress().toString());
 
             try {
@@ -127,7 +131,7 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
                 this.handleMessageQueue();
             }
         } else {
-            logger.warn("handleByte.no current message to receive data");
+            logger.warn("handleByte.no current message to receive data b:{} ignored", Integer.toHexString(b & 0xFF));
         }
     }
 
@@ -145,12 +149,12 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
     }
 
     private void startServerDelayed() {
-        this.notifyThingStatus.notifyOffline();
-        this.cleanUp();
+        notifyThingStatus.notifyOffline();
+        cleanUp();
         try {
             logger.debug("startServerDelayed waiting");
-            TimeUnit.SECONDS.sleep(10);
-            this.startServer();
+            TimeUnit.SECONDS.sleep(5);
+            startServer();
         } catch (InterruptedException e) {
             logger.error("startServerDelayed.Exception:{}", e.getMessage());
         }
@@ -175,5 +179,13 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
         logger.debug("vblindSendMessage");
         this.messageQueue.add(message);
         this.handleMessageQueue();
+    }
+
+    @Override
+    public boolean vblindIsOnline() {
+        if (this.socket != null) {
+            return this.socket.isConnected();
+        }
+        return false;
     }
 }

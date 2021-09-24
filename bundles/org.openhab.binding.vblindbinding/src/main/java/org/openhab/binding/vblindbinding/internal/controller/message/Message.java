@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vblindbinding.internal.controller;
+package org.openhab.binding.vblindbinding.internal.controller.message;
 
 /**
  * The {@link Message} is responsible for notifications
@@ -19,7 +19,7 @@ package org.openhab.binding.vblindbinding.internal.controller;
  */
 public abstract class Message {
 
-    MessageRawRequest request;
+    private MessageRawRequest request;
 
     Message(MessageRawRequest request) {
         this.request = request;
@@ -44,5 +44,9 @@ public abstract class Message {
 
     public boolean isDone() {
         return false;
+    }
+
+    public MessageRawRequest getRequest() {
+        return request;
     }
 }

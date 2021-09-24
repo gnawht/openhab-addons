@@ -10,22 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vblindbinding.internal.controller;
+package org.openhab.binding.vblindbinding.internal.controller.message;
 
 /**
- * The {@link NoResponseAvailable} is responsible for notifications
+ * The {@link MessageQueryDim} is responsible for notifications
  *
  * @author Thomas Wang-Nielsen - Initial contribution
  */
-public class NoResponseAvailable extends Exception {
-    private String message;
-
-    public NoResponseAvailable(String message) {
-        this.message = message;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
+public class MessageQueryDim extends MessageQueryInt {
+    public MessageQueryDim(int major, int minor, MessageCallback callback) {
+        super(MessageRawRequest.createQueryDim(major, minor), callback);
     }
 }

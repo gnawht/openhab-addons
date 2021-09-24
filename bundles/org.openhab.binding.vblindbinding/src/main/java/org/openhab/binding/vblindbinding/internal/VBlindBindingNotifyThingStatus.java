@@ -21,4 +21,6 @@ public interface VBlindBindingNotifyThingStatus {
     void notifyOnline();
 
     void notifyOffline();
+
+    void notifyOnChange();
 }

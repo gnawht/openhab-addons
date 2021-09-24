@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vblindbinding.internal.controller;
+package org.openhab.binding.vblindbinding.internal.controller.message;
 
 import static org.openhab.core.util.HexUtils.bytesToHex;
 
@@ -27,28 +27,26 @@ import org.slf4j.LoggerFactory;
  */
 public class MessageWithResponse extends Message {
     private final Logger logger = LoggerFactory.getLogger(MessageWithResponse.class);
-    private static final int BUFFER_SIZE = 64;
+    private static final int BUFFER_SIZE = 32;
 
-    private MessageWithResponseCallback callback;
     private boolean isDoneCalled;
     private ByteBuffer buffer;
     private Instant tsStart;
 
-    MessageWithResponse(MessageRawRequest request, MessageWithResponseCallback callback) {
+    MessageWithResponse(MessageRawRequest request) {
         super(request);
-        this.callback = callback;
         this.isDoneCalled = false;
         this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
     }
 
     public void done(MessageRawResponse response) {
         isDoneCalled = true;
-        this.callback.done(response);
+        callbackDone(response);
     }
 
     public void waiting() {
         this.tsStart = Instant.now();
-        this.callback.waiting();
+        callbackWaiting();
     }
 
     public boolean waitForResponse() {
@@ -71,5 +69,14 @@ public class MessageWithResponse extends Message {
 
     public boolean isDone() {
         return isDoneCalled;
+    }
+
+    public void callbackDone(MessageRawResponse response) {
+    }
+
+    public void callbackTimeout() {
+    }
+
+    public void callbackWaiting() {
     }
 }

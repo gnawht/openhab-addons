@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vblindbinding.internal.controller;
+package org.openhab.binding.vblindbinding.internal.controller.message;
 
 import static org.openhab.core.util.HexUtils.bytesToHex;
 import static org.openhab.core.util.HexUtils.hexToBytes;
@@ -40,6 +40,14 @@ public class MessageRawRequest extends MessageRaw {
         this.buffer = buffer;
     }
 
+    public byte getMinor() {
+        return minor;
+    }
+
+    public byte getMajor() {
+        return major;
+    }
+
     public byte[] build() {
         int size = 1 + 2 + 1 + buffer.length + 2;
         byte[] result = new byte[size];
@@ -55,7 +63,7 @@ public class MessageRawRequest extends MessageRaw {
         return result;
     }
 
-    static public MessageRawRequest createQueryPct(int major, int minor) {
+    static public MessageRawRequest createQueryPos(int major, int minor) {
         byte[] subCommand = hexToBytes("02 01", " ");
         return new MessageRawRequest((byte) major, (byte) minor, (byte) 0x01, subCommand);
     }
@@ -65,7 +73,7 @@ public class MessageRawRequest extends MessageRaw {
         return new MessageRawRequest((byte) major, (byte) minor, (byte) 0x01, subCommand);
     }
 
-    static public MessageRawRequest createSetPct(int major, int minor, int pct) {
+    static public MessageRawRequest createSetPos(int major, int minor, int pct) {
         byte[] subCommand = ByteBuffer.allocate(2).array();
         subCommand[0] = (byte) 0x04;
         subCommand[1] = (byte) pct;

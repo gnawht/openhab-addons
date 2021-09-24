@@ -18,9 +18,9 @@ import static org.openhab.core.util.HexUtils.bytesToHex;
 import static org.openhab.core.util.HexUtils.hexToBytes;
 
 import org.junit.jupiter.api.Test;
-import org.openhab.binding.vblindbinding.internal.controller.MessageRawRequest;
-import org.openhab.binding.vblindbinding.internal.controller.MessageRawResponse;
-import org.openhab.binding.vblindbinding.internal.controller.NoResponseAvailable;
+import org.openhab.binding.vblindbinding.internal.controller.message.MessageRawRequest;
+import org.openhab.binding.vblindbinding.internal.controller.message.MessageRawResponse;
+import org.openhab.binding.vblindbinding.internal.controller.message.NoResponseAvailable;
 
 /**
  * The {@link MessageRawTest} is responsible for notifications
@@ -30,7 +30,7 @@ import org.openhab.binding.vblindbinding.internal.controller.NoResponseAvailable
 public class MessageRawTest {
     @Test
     public void testRequestBuild() {
-        MessageRawRequest request001 = MessageRawRequest.createQueryPct(10, 1);
+        MessageRawRequest request001 = MessageRawRequest.createQueryPos(10, 1);
         assertEquals("55 0A 01 01 02 01 04 83", bytesToHex(request001.build(), " "));
     }
 
