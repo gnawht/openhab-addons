@@ -14,6 +14,8 @@ package org.openhab.binding.vblindbinding.internal;
 
 import static org.openhab.binding.vblindbinding.internal.VBlindBindingBindingConstants.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -43,6 +45,7 @@ public class VBlindBindingBridgeHandler extends BaseBridgeHandler implements VBl
 
     private @Nullable VBlindBindingBridgeConfiguration config;
     private @Nullable BridgeController brideController;
+    private Map<String, VBlindBindingVBlindHandler> vblindHandlers = new HashMap<String, VBlindBindingVBlindHandler>();
 
     public VBlindBindingBridgeHandler(Bridge bridge) {
         super(bridge);
@@ -84,11 +87,17 @@ public class VBlindBindingBridgeHandler extends BaseBridgeHandler implements VBl
     @Override
     public void notifyOnline() {
         updateStatus(ThingStatus.ONLINE);
+        vblindHandlers.forEach((k, v) -> {
+            ((VBlindBindingVBlindHandler) v).bridgeOnline();
+        });
     }
 
     @Override
     public void notifyOffline() {
         updateStatus(ThingStatus.OFFLINE);
+        vblindHandlers.forEach((k, v) -> {
+            ((VBlindBindingVBlindHandler) v).bridgeOffline();
+        });
     }
 
     @Override
@@ -98,11 +107,18 @@ public class VBlindBindingBridgeHandler extends BaseBridgeHandler implements VBl
     @Override
     public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
         logger.debug("childHandlerInitialized {}", childThing.getLabel());
+        vblindHandlers.put(childThing.getUID().toString(), (VBlindBindingVBlindHandler) childHandler);
+        if (brideController.vblindIsOnline()) {
+            ((VBlindBindingVBlindHandler) childHandler).bridgeOnline();
+        } else {
+            ((VBlindBindingVBlindHandler) childHandler).bridgeOffline();
+        }
     }
 
     @Override
     public void childHandlerDisposed(ThingHandler childHandler, Thing childThing) {
         logger.debug("childHandlerDisposed {}", childThing.getLabel());
+        vblindHandlers.remove(childThing.getUID().toString(), (VBlindBindingVBlindHandler) childHandler);
     }
 
     BridgeController getController() {

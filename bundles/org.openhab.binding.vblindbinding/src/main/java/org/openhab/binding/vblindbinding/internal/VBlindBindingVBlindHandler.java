@@ -80,10 +80,9 @@ public class VBlindBindingVBlindHandler extends BaseThingHandler implements VBli
     public void initialize() {
         config = getConfigAs(VBlindBindingVBlindConfiguration.class);
         logger.debug("initialize major:{} minor:{}", config.major, config.minor);
-        this.updateStatus(ThingStatus.UNKNOWN);
-        this.controller = new VBlindController(config, this,
+        updateStatus(ThingStatus.UNKNOWN);
+        controller = new VBlindController(config, this,
                 ((VBlindBindingBridgeHandler) getBridge().getHandler()).getController(), scheduler);
-        this.controller.start();
     }
 
     @Override
@@ -109,5 +108,15 @@ public class VBlindBindingVBlindHandler extends BaseThingHandler implements VBli
             updateState(CHANNEL_VBLIND_DIM, new DecimalType(controller.getCurrentDim()));
             updateState(CHANNEL_VBLIND_POSSTATE, new StringType(controller.getPosState()));
         });
+    }
+
+    public void bridgeOnline() {
+        notifyOnline();
+        controller.start();
+    }
+
+    public void bridgeOffline() {
+        notifyOffline();
+        controller.stop();
     }
 }

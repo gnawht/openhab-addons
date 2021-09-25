@@ -53,6 +53,7 @@ public class VBlindController implements CommandCallbackVBlind {
 
     public void start() {
         logger.debug("start major:{} minor:{}", config.major, config.minor);
+        stop();
         updateStateStart();
     }
 
@@ -74,12 +75,6 @@ public class VBlindController implements CommandCallbackVBlind {
 
     private void updateState() {
         logger.debug("updateState major:{} minor:{}", config.major, config.minor);
-        if (!bridgeControllerVBlindCallback.vblindIsOnline()) {
-            notifyThingStatus.notifyOffline();
-            return;
-        }
-
-        this.notifyThingStatus.notifyOnline();
         Message queryDim = new MessageQueryDim(config.major, config.minor, new MessageCallback() {
             @Override
             public void callbackDoneInt(int value) {
@@ -201,6 +196,14 @@ public class VBlindController implements CommandCallbackVBlind {
             }
             case CHANNEL_VBLIND_CONTROL_VALUE_STOP: {
                 enterStop();
+                break;
+            }
+            case CHANNEL_VBLIND_CONTROL_VALUE_PREV: {
+                enterPrev();
+                break;
+            }
+            case CHANNEL_VBLIND_CONTROL_VALUE_NEXT: {
+                enterNext();
                 break;
             }
         }
@@ -328,6 +331,34 @@ public class VBlindController implements CommandCallbackVBlind {
             }
         });
         execCommand(command);
+    }
+
+    private void enterNext() {
+        logger.debug("enterNext major:{} minor:{}", config.major, config.minor);
+        switch (getPosState()) {
+            case CHANNEL_VBLIND_POSSTATE_VALUE_OPEN:
+                enterState(CHANNEL_VBLIND_CONTROL_VALUE_GOTO_CLOSE);
+                break;
+            case CHANNEL_VBLIND_POSSTATE_VALUE_CLOSE:
+                enterState(CHANNEL_VBLIND_CONTROL_VALUE_GOTO_CLOSE_BLACK);
+                break;
+            default:
+                logger.debug("enterNext.ignored major:{} minor:{}", config.major, config.minor);
+        }
+    }
+
+    private void enterPrev() {
+        logger.debug("enterPrev major:{} minor:{}", config.major, config.minor);
+        switch (getPosState()) {
+            case CHANNEL_VBLIND_POSSTATE_VALUE_CLOSE:
+                enterState(CHANNEL_VBLIND_CONTROL_VALUE_GOTO_OPEN);
+                break;
+            case CHANNEL_VBLIND_POSSTATE_VALUE_CLOSE_BLACK:
+                enterState(CHANNEL_VBLIND_CONTROL_VALUE_GOTO_CLOSE);
+                break;
+            default:
+                logger.debug("enterPrev.ignored major:{} minor:{}", config.major, config.minor);
+        }
     }
 
     private void execCommand(Command command) {

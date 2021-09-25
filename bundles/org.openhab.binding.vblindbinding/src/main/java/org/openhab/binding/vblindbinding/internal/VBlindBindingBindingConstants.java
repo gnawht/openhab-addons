@@ -45,6 +45,8 @@ public class VBlindBindingBindingConstants {
     public static final String CHANNEL_VBLIND_CONTROL_VALUE_GOTO_POS1 = "goto_pos1";
     public static final String CHANNEL_VBLIND_CONTROL_VALUE_GOTO_POS2 = "goto_pos2";
     public static final String CHANNEL_VBLIND_CONTROL_VALUE_GOTO_POS3 = "goto_pos3";
+    public static final String CHANNEL_VBLIND_CONTROL_VALUE_PREV = "prev";
+    public static final String CHANNEL_VBLIND_CONTROL_VALUE_NEXT = "next";
 
     public static final String CHANNEL_VBLIND_POSSTATE_VALUE_OPEN = "open";
     public static final String CHANNEL_VBLIND_POSSTATE_VALUE_CLOSE = "close";

@@ -12,7 +12,6 @@
  */
 package org.openhab.binding.vblindbinding.internal.controller.message;
 
-import static org.openhab.core.util.HexUtils.bytesToHex;
 import static org.openhab.core.util.HexUtils.hexToBytes;
 
 import java.nio.ByteBuffer;
@@ -56,9 +55,7 @@ public class MessageRawRequest extends MessageRaw {
         result[2] = this.minor;
         result[3] = this.command;
         System.arraycopy(this.buffer, 0, result, 4, this.buffer.length);
-        System.out.println("build.result" + bytesToHex(result, " "));
         byte[] crc = this.calcCRC16(result, 4 + this.buffer.length);
-        System.out.println("build.crc" + bytesToHex(crc, " "));
         System.arraycopy(crc, 0, result, result.length - 2, 2);
         return result;
     }

@@ -36,6 +36,9 @@ public abstract class Message {
     public void putResponseByte(byte b) {
     }
 
+    public void error(String message) {
+    }
+
     public void done() {
     }
 

@@ -12,8 +12,6 @@
  */
 package org.openhab.binding.vblindbinding.internal.controller;
 
-import static org.openhab.core.util.HexUtils.bytesToHex;
-
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -135,19 +133,6 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
         }
     }
 
-    private void sendMessageRaw(byte[] message) {
-        logger.debug("sendMessageRaw mesage:{}", bytesToHex(message, " "));
-        if (this.socket != null) {
-            try {
-                this.socket.getOutputStream().write(message);
-            } catch (IOException e) {
-                logger.error("sendMessage Exception:{}", e.getMessage());
-            }
-        } else {
-            logger.error("sendMessage.no socket");
-        }
-    }
-
     private void startServerDelayed() {
         notifyThingStatus.notifyOffline();
         cleanUp();
@@ -164,13 +149,25 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
         logger.debug("handleMessageQueue queueSize:{}", this.messageQueue.size());
         if (this.currentMessage == null && !this.messageQueue.isEmpty()) {
             Message nextMessage = this.messageQueue.remove();
-            this.sendMessageRaw(nextMessage.buildMessageRawRequest());
-            if (nextMessage.waitForResponse()) {
-                nextMessage.waiting();
-                this.currentMessage = nextMessage;
+
+            if (this.socket != null) {
+                try {
+                    this.socket.getOutputStream().write(nextMessage.buildMessageRawRequest());
+                } catch (IOException e) {
+                    logger.error("sendMessage Exception:{}", e.getMessage());
+                    nextMessage.error("Error sending message e:" + e.getMessage());
+                }
+                if (nextMessage.waitForResponse()) {
+                    nextMessage.waiting();
+                    this.currentMessage = nextMessage;
+                } else {
+                    nextMessage.done();
+                }
             } else {
-                nextMessage.done();
+                logger.error("sendMessage.no socket");
+                nextMessage.error("Error sending message, no socket");
             }
+
         }
     }
 

@@ -60,9 +60,10 @@ public class MessageWithResponse extends Message {
         try {
             MessageRawResponse response = MessageRawResponse.parseFromBuffer(this.buffer.array(),
                     this.buffer.position());
+            logger.trace("putResponseByte.message recieved: {}", bytesToHex(this.buffer.array(), ""));
             done(response);
         } catch (NoResponseAvailable e) {
-            logger.debug("putResponseByte.NoResponseAvailable e:{} {}", e.getMessage(),
+            logger.trace("putResponseByte.NoResponseAvailable e:{} {}", e.getMessage(),
                     bytesToHex(this.buffer.array(), ""));
         }
     }

@@ -76,6 +76,8 @@
 				<option value="goto_pos1">Pos1</option>
 				<option value="goto_pos2">Pos2</option>
 				<option value="goto_pos3">Pos3</option>
+				<option value="prev">Prev</option>
+				<option value="next">Next</option>
 			</options>
 		</command>
 	</channel-type>

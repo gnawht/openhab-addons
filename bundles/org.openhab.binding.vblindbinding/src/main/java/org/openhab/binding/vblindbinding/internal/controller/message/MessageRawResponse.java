@@ -12,8 +12,6 @@
  */
 package org.openhab.binding.vblindbinding.internal.controller.message;
 
-import static org.openhab.core.util.HexUtils.bytesToHex;
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -77,20 +75,13 @@ public class MessageRawResponse extends MessageRaw {
             crc[1] = buffer[size - 1];
 
             byte[] crcCalc = calcCRC16(buffer, size - 2);
-
-            System.out.println("parseFromBuffer crc     :" + bytesToHex(crc, " "));
-            System.out.println("parseFromBuffer crcCalc :" + bytesToHex(crcCalc, " "));
-
             if (crc[0] != crcCalc[0] || crc[1] != crcCalc[1]) {
                 throw new NoResponseAvailable("invalid crc");
             }
-            System.out.println("parseFromBuffer crc.ok");
-
             byte[] data = ByteBuffer.allocate(0).array();
             if (size > 6) {
                 data = Arrays.copyOfRange(buffer, 4, 4 + size - 6);
             }
-            System.out.println("parseFromBuffer data    :" + bytesToHex(data, " "));
             return new MessageRawResponse(id, major, minor, command, data, crc,
                     ByteBuffer.wrap(buffer, 0, size).array());
         }
