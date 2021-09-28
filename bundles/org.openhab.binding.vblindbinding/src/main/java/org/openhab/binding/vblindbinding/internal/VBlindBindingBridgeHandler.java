@@ -72,7 +72,7 @@ public class VBlindBindingBridgeHandler extends BaseBridgeHandler implements VBl
         config = getConfigAs(VBlindBindingBridgeConfiguration.class);
         logger.debug("initialize host:{} port:{}", config.host, config.port);
         this.updateStatus(ThingStatus.UNKNOWN);
-        this.brideController = new BridgeController(config, this);
+        this.brideController = new BridgeController(config, this, scheduler);
         scheduler.execute(() -> {
             this.brideController.start();
         });

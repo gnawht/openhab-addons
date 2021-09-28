@@ -20,36 +20,44 @@ package org.openhab.binding.vblindbinding.internal.controller.message;
 public abstract class Message {
 
     private MessageRawRequest request;
+    private boolean isDoneFlag;
 
     Message(MessageRawRequest request) {
         this.request = request;
+        this.isDoneFlag = false;
     }
 
     public byte[] buildMessageRawRequest() {
         return this.request.build();
     }
 
-    public boolean waitForResponse() {
-        return false;
-    }
-
-    public void putResponseByte(byte b) {
-    }
-
-    public void error(String message) {
-    }
-
-    public void done() {
-    }
-
-    public void waiting() {
-    }
-
-    public boolean isDone() {
-        return false;
-    }
-
     public MessageRawRequest getRequest() {
         return request;
     }
+
+    public long getTimeoutSec() {
+        return 4;
+    }
+
+    public void done() {
+        this.isDoneFlag = true;
+    }
+
+    public void error(String error) {
+        done();
+    }
+
+    public void timeout() {
+        done();
+    }
+
+    public boolean isDone() {
+        return isDoneFlag;
+    }
+
+    public abstract boolean waitForResponse();
+
+    public abstract void putResponseByte(byte b);
+
+    public abstract void waiting();
 }

@@ -15,7 +15,6 @@ package org.openhab.binding.vblindbinding.internal.controller.message;
 import static org.openhab.core.util.HexUtils.bytesToHex;
 
 import java.nio.ByteBuffer;
-import java.time.Instant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,30 +28,31 @@ public class MessageWithResponse extends Message {
     private final Logger logger = LoggerFactory.getLogger(MessageWithResponse.class);
     private static final int BUFFER_SIZE = 32;
 
-    private boolean isDoneCalled;
     private ByteBuffer buffer;
-    private Instant tsStart;
 
     MessageWithResponse(MessageRawRequest request) {
         super(request);
-        this.isDoneCalled = false;
         this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
     }
 
-    public void done(MessageRawResponse response) {
-        isDoneCalled = true;
+    private void done(MessageRawResponse response) {
+        if (!isDone()) {
+            super.done();
+        }
         callbackDone(response);
     }
 
+    @Override
     public void waiting() {
-        this.tsStart = Instant.now();
         callbackWaiting();
     }
 
+    @Override
     public boolean waitForResponse() {
         return true;
     }
 
+    @Override
     public void putResponseByte(byte b) {
         if (this.buffer.position() < (BUFFER_SIZE - 1)) {
             this.buffer.put(b);
@@ -60,7 +60,7 @@ public class MessageWithResponse extends Message {
         try {
             MessageRawResponse response = MessageRawResponse.parseFromBuffer(this.buffer.array(),
                     this.buffer.position());
-            logger.trace("putResponseByte.message recieved: {}", bytesToHex(this.buffer.array(), ""));
+            logger.trace("putResponseByte.message received: {}", bytesToHex(this.buffer.array(), ""));
             done(response);
         } catch (NoResponseAvailable e) {
             logger.trace("putResponseByte.NoResponseAvailable e:{} {}", e.getMessage(),
@@ -68,8 +68,12 @@ public class MessageWithResponse extends Message {
         }
     }
 
-    public boolean isDone() {
-        return isDoneCalled;
+    @Override
+    public void timeout() {
+        if (!isDone()) {
+            super.done();
+            callbackTimeout();
+        }
     }
 
     public void callbackDone(MessageRawResponse response) {

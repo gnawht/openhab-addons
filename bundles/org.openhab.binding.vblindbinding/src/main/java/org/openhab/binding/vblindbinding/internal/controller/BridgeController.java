@@ -12,12 +12,15 @@
  */
 package org.openhab.binding.vblindbinding.internal.controller;
 
+import static org.openhab.core.util.HexUtils.bytesToHex;
+
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.Nullable;
@@ -45,9 +48,13 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
     private Queue<Message> messageQueue = new LinkedList<Message>();
     private @Nullable Message currentMessage;
 
-    public BridgeController(VBlindBindingBridgeConfiguration config, VBlindBindingNotifyThingStatus notifyThingStatus) {
+    ScheduledExecutorService scheduler;
+
+    public BridgeController(VBlindBindingBridgeConfiguration config, VBlindBindingNotifyThingStatus notifyThingStatus,
+            ScheduledExecutorService scheduler) {
         this.config = config;
         this.notifyThingStatus = notifyThingStatus;
+        this.scheduler = scheduler;
         this.stop = false;
     }
 
@@ -117,16 +124,11 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
         }
     }
 
-    private void handleByte(byte b) {
+    private synchronized void handleByte(byte b) {
         if (this.currentMessage != null) {
             this.currentMessage.putResponseByte(b);
             if (this.currentMessage.isDone()) {
-                this.currentMessage = null;
-                try {
-                    TimeUnit.MILLISECONDS.sleep(1000);
-                } catch (InterruptedException e) {
-                }
-                this.handleMessageQueue();
+                handleMessageQueueNext();
             }
         } else {
             logger.warn("handleByte.no current message to receive data b:{} ignored", Integer.toHexString(b & 0xFF));
@@ -146,20 +148,29 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
     }
 
     private synchronized void handleMessageQueue() {
-        logger.debug("handleMessageQueue queueSize:{}", this.messageQueue.size());
+        logger.debug("handleMessageQueue queueSize:{} hasCurrentMessage:{}", this.messageQueue.size(),
+                this.currentMessage != null);
         if (this.currentMessage == null && !this.messageQueue.isEmpty()) {
             Message nextMessage = this.messageQueue.remove();
-
             if (this.socket != null) {
                 try {
-                    this.socket.getOutputStream().write(nextMessage.buildMessageRawRequest());
+                    byte[] messageRaw = nextMessage.buildMessageRawRequest();
+                    logger.trace("handleMessageQueue.send wait:{} raw:{}", nextMessage.waitForResponse(),
+                            bytesToHex(messageRaw, " "));
+                    this.socket.getOutputStream().write(messageRaw);
                 } catch (IOException e) {
                     logger.error("sendMessage Exception:{}", e.getMessage());
                     nextMessage.error("Error sending message e:" + e.getMessage());
                 }
                 if (nextMessage.waitForResponse()) {
-                    nextMessage.waiting();
                     this.currentMessage = nextMessage;
+                    nextMessage.waiting();
+                    scheduler.schedule(() -> {
+                        if (!nextMessage.isDone()) {
+                            nextMessage.timeout();
+                            handleMessageQueueNext();
+                        }
+                    }, nextMessage.getTimeoutSec(), TimeUnit.SECONDS);
                 } else {
                     nextMessage.done();
                 }
@@ -167,8 +178,16 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
                 logger.error("sendMessage.no socket");
                 nextMessage.error("Error sending message, no socket");
             }
-
         }
+    }
+
+    private synchronized void handleMessageQueueNext() {
+        this.currentMessage = null;
+        try {
+            TimeUnit.MILLISECONDS.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+        this.handleMessageQueue();
     }
 
     @Override

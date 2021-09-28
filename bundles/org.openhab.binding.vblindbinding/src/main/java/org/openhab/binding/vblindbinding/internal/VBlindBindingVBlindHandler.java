@@ -117,6 +117,8 @@ public class VBlindBindingVBlindHandler extends BaseThingHandler implements VBli
 
     public void bridgeOffline() {
         notifyOffline();
-        controller.stop();
+        if (controller != null) {
+            controller.stop();
+        }
     }
 }

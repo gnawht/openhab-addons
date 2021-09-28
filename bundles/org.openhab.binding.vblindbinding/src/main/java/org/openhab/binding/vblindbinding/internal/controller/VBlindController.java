@@ -81,6 +81,11 @@ public class VBlindController implements CommandCallbackVBlind {
                 logger.debug("MessageQueryDim.response {}", value);
                 updateDim(value);
             }
+
+            @Override
+            public void callbackTimeout() {
+                logger.debug("MessageQueryDim.timeout");
+            }
         });
 
         Message queryPct = new MessageQueryPos(config.major, config.minor, new MessageCallback() {
@@ -88,6 +93,11 @@ public class VBlindController implements CommandCallbackVBlind {
             public void callbackDoneInt(int value) {
                 logger.debug("MessageQueryPct.response {}", value);
                 updatePos(value);
+            }
+
+            @Override
+            public void callbackTimeout() {
+                logger.debug("MessageQueryPct.timeout");
             }
         });
         this.bridgeControllerVBlindCallback.vblindSendMessage(queryDim);
@@ -117,8 +127,7 @@ public class VBlindController implements CommandCallbackVBlind {
     public String getPosState() {
         if (currentCommand != null) {
             return CHANNEL_VBLIND_POSSTATE_VALUE_CHANGE;
-        }
-        if (currentPos == 100 && currentDim == 90) {
+        } else if (currentPos == 100 && currentDim == 90) {
             return CHANNEL_VBLIND_POSSTATE_VALUE_OPEN;
         } else if (currentPos == 0 && currentDim == 90) {
             return CHANNEL_VBLIND_POSSTATE_VALUE_CLOSE;
@@ -153,6 +162,11 @@ public class VBlindController implements CommandCallbackVBlind {
             public void callbackDone() {
                 logger.debug("MessageSetPos.response");
             }
+
+            @Override
+            public void callbackTimeout() {
+                logger.debug("MessageSetPos.callbackTimeout");
+            }
         });
         this.bridgeControllerVBlindCallback.vblindSendMessage(setPos);
     }
@@ -162,6 +176,11 @@ public class VBlindController implements CommandCallbackVBlind {
             @Override
             public void callbackDone() {
                 logger.debug("MessageSetDim.response");
+            }
+
+            @Override
+            public void callbackTimeout() {
+                logger.debug("MessageSetDim.callbackTimeout");
             }
         });
         this.bridgeControllerVBlindCallback.vblindSendMessage(setDim);
@@ -288,15 +307,20 @@ public class VBlindController implements CommandCallbackVBlind {
 
     private void enterUserPos(String configPosStr) {
         logger.debug("enterUserPos major:{} minor:{} configPosStr:{}", config.major, config.minor, configPosStr);
-
-        String[] configPosStrSplit = configPosStr.split(":");
-        if (configPosStrSplit.length == 2) {
-            int pos = Integer.parseInt(configPosStrSplit[0].trim());
-            int dim = Integer.parseInt(configPosStrSplit[1].trim());
-            enterPosAndDim(pos, dim);
-        } else {
-            logger.debug("enterUserPos.error invalid config major:{} minor:{} configPosStr:{}", config.major,
-                    config.minor, configPosStr);
+        if(configPosStr != null) {
+            String[] configPosStrSplit = configPosStr.split(":");
+            if (configPosStrSplit.length == 2) {
+                int pos = Integer.parseInt(configPosStrSplit[0].trim());
+                int dim = Integer.parseInt(configPosStrSplit[1].trim());
+                enterPosAndDim(pos, dim);
+            } else {
+                logger.warn("enterUserPos.error invalid config major:{} minor:{} configPosStr:{}", config.major,
+                        config.minor, configPosStr);
+            }
+        }
+        else {
+            logger.warn("enterUserPos.error missing config string major:{} minor:{}", config.major,
+                    config.minor);
         }
     }
 
@@ -373,6 +397,7 @@ public class VBlindController implements CommandCallbackVBlind {
 
     private void execCommandDone() {
         currentCommand = null;
+        notifyThingStatus.notifyOnChange();
     }
 
     @Override
