@@ -307,7 +307,7 @@ public class VBlindController implements CommandCallbackVBlind {
 
     private void enterUserPos(String configPosStr) {
         logger.debug("enterUserPos major:{} minor:{} configPosStr:{}", config.major, config.minor, configPosStr);
-        if(configPosStr != null) {
+        if (configPosStr != null) {
             String[] configPosStrSplit = configPosStr.split(":");
             if (configPosStrSplit.length == 2) {
                 int pos = Integer.parseInt(configPosStrSplit[0].trim());
@@ -317,10 +317,8 @@ public class VBlindController implements CommandCallbackVBlind {
                 logger.warn("enterUserPos.error invalid config major:{} minor:{} configPosStr:{}", config.major,
                         config.minor, configPosStr);
             }
-        }
-        else {
-            logger.warn("enterUserPos.error missing config string major:{} minor:{}", config.major,
-                    config.minor);
+        } else {
+            logger.warn("enterUserPos.error missing config string major:{} minor:{}", config.major, config.minor);
         }
     }
 
