@@ -83,6 +83,9 @@ public class VBlindBindingVBlindHandler extends BaseThingHandler implements VBli
         updateStatus(ThingStatus.UNKNOWN);
         controller = new VBlindController(config, this,
                 ((VBlindBindingBridgeHandler) getBridge().getHandler()).getController(), scheduler);
+        if (((VBlindBindingBridgeHandler) getBridge().getHandler()).getController().vblindIsOnline()) {
+            controller.start();
+        }
     }
 
     @Override

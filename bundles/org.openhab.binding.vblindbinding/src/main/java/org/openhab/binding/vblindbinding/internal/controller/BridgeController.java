@@ -184,7 +184,7 @@ public class BridgeController extends Thread implements BridgeControllerVBlindCa
     private synchronized void handleMessageQueueNext() {
         this.currentMessage = null;
         try {
-            TimeUnit.MILLISECONDS.sleep(1000);
+            TimeUnit.MILLISECONDS.sleep(250);
         } catch (InterruptedException e) {
         }
         this.handleMessageQueue();
