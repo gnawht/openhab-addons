@@ -89,9 +89,13 @@ public class LH4WiegandHandler extends BaseThingHandler implements ControllerCal
         }
         updateState(CHANNEL_ACCESS, new StringType(access));
         logger.debug("notifyAccess access:{}", access);
-        notifyAccessSchedule = scheduler.schedule(() -> {
-            updateState(CHANNEL_ACCESS, new StringType(""));
-            logger.debug("notifyAccess access.cleared");
-        }, config.accessTimeoutSec, TimeUnit.SECONDS);
+        if (config.accessTimeoutSec > 0) {
+            notifyAccessSchedule = scheduler.schedule(() -> {
+                updateState(CHANNEL_ACCESS, new StringType(""));
+                logger.debug("notifyAccess access.cleared");
+            }, config.accessTimeoutSec, TimeUnit.SECONDS);
+        } else {
+            logger.debug("notifyAccess access.clear.disabled");
+        }
     }
 }

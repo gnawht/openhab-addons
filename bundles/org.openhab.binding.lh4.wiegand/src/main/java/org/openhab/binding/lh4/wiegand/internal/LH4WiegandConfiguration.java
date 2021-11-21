@@ -25,4 +25,5 @@ public class LH4WiegandConfiguration {
     public String host;
     public int port;
     public int accessTimeoutSec;
+    public String encryptionKey;
 }

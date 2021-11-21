@@ -26,6 +26,10 @@
 				<label>Access Timeout (sec)</label>
 				<description>Time for access to be cleared in sec. 0 sec means never.</description>
 			</parameter>
+			<parameter name="encryptionKey" type="text" required="false">
+				<label>Encryption Key</label>
+				<description>AES-CBC Encryption Key, if not specified encryption is disabled</description>
+			</parameter>
 		</config-description>
 	</thing-type>
 

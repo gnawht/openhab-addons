@@ -19,8 +19,8 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.security.spec.KeySpec;
-import java.util.Base64;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +35,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.lh4.wiegand.internal.LH4WiegandConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonObject;
 
 /**
  * The {@link Controller} is responsible for notifications
@@ -145,7 +147,7 @@ public class Controller extends Thread {
     private void handleBuffer() {
         byte[] message = new byte[buffer.position()];
         System.arraycopy(buffer.array(), 0, message, 0, buffer.position());
-        String messageStr = bytesToHex(message, " ");
+        String messageStr = bytesToHex(message);
         clearBuffer();
         logger.debug("handleBuffer access: {}", messageStr);
         callback.notifyAccess(encrypt(messageStr));
@@ -162,25 +164,42 @@ public class Controller extends Thread {
         return false;
     }
 
-    private static final String SECRET_KEY = "my_super_secret_key_ho_ho_ho";
-    private static final String SALT = "ssshhhhhhhhhhh!!!!";
+    private static final String SALT = "lh4SecureSalt";
 
-    public static String encrypt(String strToEncrypt) {
-        try {
-            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            IvParameterSpec ivspec = new IvParameterSpec(iv);
+    public String encrypt(String strToEncrypt) {
+        logger.debug("handleBuffer encrypt: {}", strToEncrypt);
+        JsonObject result = new JsonObject();
+        if (this.config.encryptionKey == null || this.config.encryptionKey.isEmpty()) {
+            logger.debug("handleBuffer encrypt.encryption.disabled");
+            result.addProperty("rc", 0);
+            result.addProperty("encrypted", false);
+            result.addProperty("message", strToEncrypt);
+        } else {
+            logger.debug("handleBuffer encrypt.encryption.enabled");
+            result.addProperty("rc", 0);
+            result.addProperty("encrypted", true);
+            try {
+                byte[] iv = new byte[16];
+                SecureRandom.getInstanceStrong().nextBytes(iv);
+                // byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                IvParameterSpec ivspec = new IvParameterSpec(iv);
+                result.addProperty("iv", bytesToHex(iv));
 
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            KeySpec spec = new PBEKeySpec(SECRET_KEY.toCharArray(), SALT.getBytes(), 65536, 256);
-            SecretKey tmp = factory.generateSecret(spec);
-            SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+                SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+                KeySpec spec = new PBEKeySpec(this.config.encryptionKey.toCharArray(), SALT.getBytes(), 65536, 256);
+                SecretKey tmp = factory.generateSecret(spec);
+                SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
 
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
-            return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception e) {
-            System.out.println("Error while encrypting: " + e.toString());
+                Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
+                result.addProperty("message",
+                        bytesToHex(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8))));
+            } catch (Exception e) {
+                System.out.println("Error while encrypting: " + e.toString());
+                result.addProperty("rc", 1);
+            }
         }
-        return null;
+        logger.debug("handleBuffer result: {}", result.toString());
+        return result.toString();
     }
 }
