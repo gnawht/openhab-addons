@@ -51,6 +51,11 @@ public class CommandStop extends Command {
         callback.callbackCanceled();
     }
 
+    @Override
+    public String getInfo() {
+        return "CommandStop";
+    }
+
     private void enterStateStop() {
         logger.debug("enterStateStop");
         Message stop = new MessageStop(major, minor, new MessageCallback() {

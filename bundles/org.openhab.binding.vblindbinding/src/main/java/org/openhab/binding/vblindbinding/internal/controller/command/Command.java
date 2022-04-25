@@ -45,4 +45,6 @@ public abstract class Command {
     public void cancel() {
         cancled = true;
     }
+
+    public abstract String getInfo();
 }

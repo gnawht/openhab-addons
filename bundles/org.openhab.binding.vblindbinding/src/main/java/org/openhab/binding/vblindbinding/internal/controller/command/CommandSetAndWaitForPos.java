@@ -60,6 +60,11 @@ public class CommandSetAndWaitForPos extends Command {
         callback.callbackCanceled();
     }
 
+    @Override
+    public String getInfo() {
+        return "CommandSetAndWaitForPos";
+    }
+
     private void enterStateCheckPos(int checkValue) {
         logger.debug("enterStateCheckPos checkValue:{}", checkValue);
         Message queryPos = new MessageQueryPos(major, minor, new MessageCallback() {

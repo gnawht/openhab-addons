@@ -58,6 +58,22 @@ public class CommandList extends Command implements CommandCallback {
         }
     }
 
+    @Override
+    public String getInfo() {
+        final String[] result = { "CommandList commands:[" };
+        this.commands.forEach(command -> {
+            result[0] += command.getInfo();
+        });
+        result[0] += "]";
+        result[0] += " commandsDone:[";
+        this.commandsDone.forEach(command -> {
+            result[0] += command.getInfo();
+            result[0] += ", ";
+        });
+        result[0] += "]";
+        return result[0];
+    }
+
     private void runNextCommand() {
         synchronized (this) {
             logger.debug("runNextCommand size:{}", commands.size());

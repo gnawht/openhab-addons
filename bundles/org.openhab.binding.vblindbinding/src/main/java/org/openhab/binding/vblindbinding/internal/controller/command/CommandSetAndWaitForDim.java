@@ -60,6 +60,11 @@ public class CommandSetAndWaitForDim extends Command {
         callback.callbackCanceled();
     }
 
+    @Override
+    public String getInfo() {
+        return "CommandSetAndWaitForDim";
+    }
+
     private void enterStateCheckDim(int checkValue) {
         logger.debug("enterStateCheckDim checkValue:{}", checkValue);
         Message queryDim = new MessageQueryDim(major, minor, new MessageCallback() {

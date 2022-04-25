@@ -126,6 +126,8 @@ public class VBlindController implements CommandCallbackVBlind {
 
     public String getPosState() {
         if (currentCommand != null) {
+            logger.debug("getPosState.command_running major:{} minor:{} commandInfo:{}", config.major, config.minor,
+                    currentCommand.getInfo());
             return CHANNEL_VBLIND_POSSTATE_VALUE_CHANGE;
         } else if (currentPos == 100 && currentDim == 90) {
             return CHANNEL_VBLIND_POSSTATE_VALUE_OPEN;
@@ -142,6 +144,8 @@ public class VBlindController implements CommandCallbackVBlind {
         } else if (checkPosStateForUserPos(currentPos, currentDim, config.pos3)) {
             return CHANNEL_VBLIND_POSSTATE_VALUE_POS3;
         } else {
+            logger.debug("getPosState.unknown major:{} minor:{} currentPos:{} currentDim:{}", config.major,
+                    config.minor, currentPos, currentDim);
             return CHANNEL_VBLIND_POSSTATE_VALUE_UNKNOWN;
         }
     }
@@ -365,7 +369,7 @@ public class VBlindController implements CommandCallbackVBlind {
                 enterState(CHANNEL_VBLIND_CONTROL_VALUE_GOTO_CLOSE_BLACK);
                 break;
             default:
-                logger.debug("enterNext.ignored major:{} minor:{}", config.major, config.minor);
+                logger.debug("enterNext.ignored major:{} minor:{} state:{}", config.major, config.minor, getPosState());
         }
     }
 
@@ -379,7 +383,7 @@ public class VBlindController implements CommandCallbackVBlind {
                 enterState(CHANNEL_VBLIND_CONTROL_VALUE_GOTO_CLOSE);
                 break;
             default:
-                logger.debug("enterPrev.ignored major:{} minor:{}", config.major, config.minor);
+                logger.debug("enterPrev.ignored major:{} minor:{} state:{}", config.major, config.minor, getPosState());
         }
     }
 
@@ -394,7 +398,9 @@ public class VBlindController implements CommandCallbackVBlind {
     }
 
     private void execCommandDone() {
-        currentCommand = null;
+        synchronized (this) {
+            currentCommand = null;
+        }
         notifyThingStatus.notifyOnChange();
     }
 
